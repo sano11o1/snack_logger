@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "logger/grpc";
+
+// packageの宣言
+package logger;
+
+// サービスの定義
+service LogService {
+	// サービスが持つメソッドの定義
+	rpc Route(stream LogRequest) returns (LogResponse); 
+}
+
+// 型の定義
+message LogRequest {
+	string message = 2;
+}
+
+message LogResponse {
+	string message = 1;
+}
