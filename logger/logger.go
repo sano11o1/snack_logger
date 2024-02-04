@@ -28,7 +28,6 @@ func SnackLoggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return err
 		}
 
-		fmt.Println("=============Response============", "10秒待たされるはず")
 		res, err := stream.CloseAndRecv()
 		if err != nil {
 			return err
@@ -53,4 +52,16 @@ func InitSnackLoggerConnection() (loggerpb.LogServiceClient, *grpc.ClientConn) {
 	fmt.Println("start gRPC Client.")
 
 	return loggerpb.NewLogServiceClient(conn), conn
+}
+
+func Info(msg string, stream loggerpb.LogService_LogClient) error {
+	fmt.Println(msg)
+
+	if err := stream.Send(&loggerpb.LogRequest{
+		Message: msg,
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }

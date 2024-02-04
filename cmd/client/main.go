@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sano11o1/snack_logger/logger"
@@ -38,16 +39,11 @@ func HelloHandler(c echo.Context) error {
 		return fmt.Errorf("failed to get stream")
 	}
 
-	if err := stream.Send(&loggerpb.LogRequest{
-		Message: "Hello, World!",
-	}); err != nil {
-		return err
-	}
-
-	if err := stream.Send(&loggerpb.LogRequest{
-		Message: "Hello, Friend!",
-	}); err != nil {
-		return err
+	for i := 0; i < 10; i++ {
+		if err := logger.Info(fmt.Sprintf("Hello, World! %d", i), stream); err != nil {
+			return err
+		}
+		time.Sleep(1 * time.Second)
 	}
 
 	return c.String(http.StatusOK, "OK!")

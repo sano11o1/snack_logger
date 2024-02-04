@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"time"
 
 	"google.golang.org/grpc"
 
@@ -51,14 +50,13 @@ func main() {
 func (s Server) Log(stream loggerpb.LogService_LogServer) error {
 	for {
 		req, err := stream.Recv()
-		fmt.Println("=============Request============", req.GetMessage())
 		if errors.Is(err, io.EOF) {
-			fmt.Println("=============EOF============")
-			time.Sleep(10 * time.Second)
+			fmt.Println("request:", "EOF")
 			return stream.SendAndClose(&loggerpb.LogResponse{
-				Message: "End of Universe",
+				Message: "End of Stream",
 			})
 		}
+		fmt.Println("request:", req.GetMessage())
 		if err != nil {
 			return err
 		}
