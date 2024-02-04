@@ -8,7 +8,7 @@ package logger;
 // サービスの定義
 service LogService {
 	// サービスが持つメソッドの定義
-	rpc Route(stream LogRequest) returns (LogResponse); 
+	rpc Log(stream LogRequest) returns (LogResponse); 
 }
 
 // 型の定義

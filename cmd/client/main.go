@@ -27,7 +27,7 @@ func main() {
 
 func stream(c loggerpb.LogServiceClient) error {
 	fmt.Println("echoサーバーのリクエストでstreamを開始します。")
-	client, err := c.Route(context.Background())
+	client, err := c.Log(context.Background())
 	if err != nil {
 		return err
 	}

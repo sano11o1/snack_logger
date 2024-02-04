@@ -47,7 +47,7 @@ func main() {
 
 }
 
-func (s Server) Route(stream loggerpb.LogService_RouteServer) error {
+func (s Server) Route(stream loggerpb.LogService_LogServer) error {
 	for {
 		req, err := stream.Recv()
 		fmt.Println("=============Request============", req.GetMessage())
