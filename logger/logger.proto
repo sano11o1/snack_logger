@@ -13,7 +13,7 @@ service LogService {
 
 // 型の定義
 message LogRequest {
-	string message = 2;
+	string message = 1;
 }
 
 message LogResponse {
