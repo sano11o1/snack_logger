@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -11,39 +10,45 @@ import (
 )
 
 func main() {
-	client, conn := logger.InitSnackLogger()
+	// GRPCサーバーに接続する
+	client, conn := logger.InitSnackLoggerConnection()
+
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		if err := stream(client); err != nil {
-			fmt.Println(err)
-			return c.String(http.StatusInternalServerError, "Error")
+
+	// 全てのリクエストでクライアントコネクションを使用できるように設定
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Set("grpcClient", client)
+			return next(c)
 		}
-		return c.String(http.StatusOK, "Hello, World!")
 	})
+
+	e.Use(logger.SnackLoggerMiddleware)
+
+	e.GET("/hello", HelloHandler)
+
 	e.Logger.Fatal(e.Start(":1324"))
 
 	defer conn.Close()
 }
 
-func stream(c loggerpb.LogServiceClient) error {
-	fmt.Println("echoサーバーのリクエストでstreamを開始します。")
-	client, err := c.Log(context.Background())
-	if err != nil {
-		return err
+func HelloHandler(c echo.Context) error {
+	stream, err := c.Get("stream").(loggerpb.LogService_LogClient)
+	if !err {
+		return fmt.Errorf("failed to get stream")
 	}
 
-	if err := client.Send(&loggerpb.LogRequest{
+	if err := stream.Send(&loggerpb.LogRequest{
 		Message: "Hello, World!",
 	}); err != nil {
 		return err
 	}
 
-	res, err := client.CloseAndRecv()
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(res.GetMessage())
+	if err := stream.Send(&loggerpb.LogRequest{
+		Message: "Hello, Friend!",
+	}); err != nil {
+		return err
 	}
-	fmt.Println("echoサーバーのリクエストでstreamを終了します。")
-	return nil
+
+	return c.String(http.StatusOK, "OK!")
 }
